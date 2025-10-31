@@ -1,24 +1,20 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.InappropriateInputException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 @Slf4j
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-     private final Map<Integer, Film> films;
+    private final Map<Integer, Film> films;
 
     public FilmController() {
         films = new HashMap<>();

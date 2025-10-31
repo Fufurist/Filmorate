@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.InappropriateInputException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,31 +15,32 @@ import java.util.Map;
 @RequestMapping("/users")
 public class UserController {
     private final Map<Integer, User> users;
+
     public UserController() {
         users = new HashMap<>();
     }
 
     @PostMapping
-    public User create(@RequestBody User user){
+    public User create(@RequestBody User user) {
         log.trace("Создать нового пользователя");
-        if (user.getEmail() == null || user.getEmail().isBlank()){
+        if (user.getEmail() == null || user.getEmail().isBlank()) {
             log.error("Почта пользователя не может быть пустой");
             throw new InappropriateInputException("Почта пользователя не может быть пустой");
         }
-        if (!user.getEmail().contains("@")){
+        if (!user.getEmail().contains("@")) {
             log.error("Почта пользователя должна содержать @");
             throw new InappropriateInputException("Почта пользователя должна содержать @");
         }
         //Опять же в ТЗ нет требования проверки уникальности логина/почты
-        if (user.getLogin() == null || user.getLogin().isBlank()){
+        if (user.getLogin() == null || user.getLogin().isBlank()) {
             log.error("Логин не пожет быть пуст");
             throw new InappropriateInputException("Логин не пожет быть пуст");
         }
-        if (user.getLogin().contains(" ")){
+        if (user.getLogin().contains(" ")) {
             log.error("Логин не может содержать пробелов");
             throw new InappropriateInputException("Логин не может содержать пробелов");
         }
-        if (user.getBirthday().isAfter(LocalDate.now())){
+        if (user.getBirthday().isAfter(LocalDate.now())) {
             log.error("Дата рождения не может быть в будущем");
             throw new InappropriateInputException("Дата рождения не может быть в будущем");
         }
@@ -51,29 +51,29 @@ public class UserController {
     }
 
     @PutMapping
-    public User update(@RequestBody User user){
+    public User update(@RequestBody User user) {
         log.trace("Обновление пользователя");
-        if (!users.containsKey(user.getId())){
+        if (!users.containsKey(user.getId())) {
             log.error("Пользователь с таким ID не найден");
             throw new InappropriateInputException("Пользователь с таким ID не найден");
         }
-        if (user.getEmail() == null || user.getEmail().isBlank()){
+        if (user.getEmail() == null || user.getEmail().isBlank()) {
             log.error("Почта пользователя не может быть пустой");
             throw new InappropriateInputException("Почта пользователя не может быть пустой");
         }
-        if (!user.getEmail().contains("@")){
+        if (!user.getEmail().contains("@")) {
             log.error("Почта пользователя должна содержать @");
             throw new InappropriateInputException("Почта пользователя должна содержать @");
         }
-        if (user.getLogin() == null || user.getLogin().isBlank()){
+        if (user.getLogin() == null || user.getLogin().isBlank()) {
             log.error("Логин не пожет быть пуст");
             throw new InappropriateInputException("Логин не пожет быть пуст");
         }
-        if (user.getLogin().contains(" ")){
+        if (user.getLogin().contains(" ")) {
             log.error("Логин не может содержать пробелов");
             throw new InappropriateInputException("Логин не может содержать пробелов");
         }
-        if (user.getBirthday().isAfter(LocalDate.now())){
+        if (user.getBirthday().isAfter(LocalDate.now())) {
             log.error("Дата рождения не может быть в будущем");
             throw new InappropriateInputException("Дата рождения не может быть в будущем");
         }
@@ -84,7 +84,7 @@ public class UserController {
     }
 
     @GetMapping
-    public Collection<User> findAll(){
+    public Collection<User> findAll() {
         log.info("Запрос всех пользователей");
         return users.values();
     }
