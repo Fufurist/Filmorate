@@ -44,6 +44,9 @@ public class UserController {
             log.error("Дата рождения не может быть в будущем");
             throw new InappropriateInputException("Дата рождения не может быть в будущем");
         }
+        if (user.getName() == null || user.getName().isBlank()){
+            user.setName(user.getLogin());
+        }
 
         user.setId(getNextFreeId());
         users.put(user.getId(), user);
@@ -81,6 +84,9 @@ public class UserController {
         if (user.getBirthday().isAfter(LocalDate.now())) {
             log.error("Дата рождения не может быть в будущем");
             throw new InappropriateInputException("Дата рождения не может быть в будущем");
+        }
+        if (user.getName() == null || user.getName().isBlank()){
+            user.setName(user.getLogin());
         }
 
         users.put(user.getId(), user);

@@ -35,7 +35,7 @@ public class FilmController {
             log.error("Дата релиза должна быть не раньше 28 декабря 1985 года");
             throw new InappropriateInputException("Дата релиза должна быть не раньше 28 декабря 1985 года");
         }
-        if (film.getDuration() > 0/*.isPositive()*/) {
+        if (film.getDuration().isPositive()) {
             log.error("Длительность фильма должна быть положительной");
             throw new InappropriateInputException("Длительность фильма должна быть положительной");
         }
@@ -70,7 +70,7 @@ public class FilmController {
             log.error("Дата релиза должна быть не раньше 28 декабря 1985 года");
             throw new InappropriateInputException("Дата релиза должна быть не раньше 28 декабря 1985 года");
         }
-        if (film.getDuration() > 0/*.isPositive()*/) {
+        if (film.getDuration().isPositive()) {
             log.error("Длительность фильма должна быть положительной");
             throw new InappropriateInputException("Длительность фильма должна быть положительной");
         }
