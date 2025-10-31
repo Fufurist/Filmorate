@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.exceptions.InappropriateInputException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
-import java.util.InvalidPropertiesFormatException;
 
 public class UserControllerTest {
     private UserController controller;
@@ -35,7 +34,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void emailValidation(){
+    public void emailValidation() {
         User user = new User();
         user.setEmail("aaa@");//"golder.ok@mail.com");
         user.setName("");
@@ -43,13 +42,13 @@ public class UserControllerTest {
         user.setBirthday(LocalDate.of(2001, 5, 23));
         try {
             controller.create(user);
-        } catch(Throwable e) {
+        } catch (Throwable e) {
             Assertions.fail("Unexpected error", e);
         }
         user.setEmail(null);
         try {
             controller.create(user);
-        } catch(InappropriateInputException e){
+        } catch (InappropriateInputException e) {
             try {
                 user.setEmail("noDoggo");
                 controller.create(user);
@@ -59,14 +58,14 @@ public class UserControllerTest {
                 Assertions.fail("Unexpected error", e);
             }
             Assertions.fail("Email without @ slipped");
-        } catch(Throwable e) {
+        } catch (Throwable e) {
             Assertions.fail("Unexpected error", e);
         }
         Assertions.fail("Blank email slipped");
     }
 
     @Test
-    public void birthDayTooLate(){
+    public void birthDayTooLate() {
         User user = new User();
         user.setEmail("aaa@");//"golder.ok@mail.com");
         user.setName("");
