@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
 
-import java.time.Duration;
+//import java.time.Duration;
 import java.time.LocalDate;
 
 @Data
