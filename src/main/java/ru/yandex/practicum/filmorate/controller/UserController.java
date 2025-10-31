@@ -45,9 +45,14 @@ public class UserController {
             throw new InappropriateInputException("Дата рождения не может быть в будущем");
         }
 
+        user.setId(getNextFreeId());
         users.put(user.getId(), user);
         log.info("Создан новый пользователь");
         return user;
+    }
+
+    private int getNextFreeId() {
+        return users.keySet().stream().max(Integer::compare).orElse(0) + 1;
     }
 
     @PutMapping
