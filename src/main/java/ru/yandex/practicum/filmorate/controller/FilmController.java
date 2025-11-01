@@ -14,32 +14,36 @@ import java.util.Map;
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    private final Map<Integer, Film> films;
+    private final Map<Integer, Film> films = new HashMap<>();
+    private static final LocalDate CINEMA_BIRTH = LocalDate.of(1895, 12, 28);
 
-    public FilmController() {
-        films = new HashMap<>();
-    }
-
-    @PostMapping
-    public Film create(@RequestBody Film film) {
-        log.trace("Добавление фильма ");
+    private void validateFilm(Film film){
         if (film.getName() == null || film.getName().isBlank()) {
             log.error("Название фильма не может быть пустым");
             throw new InappropriateInputException("Название фильма не может быть пустым");
         }
-        if (film.getDescription().length() > 200) {
+        if (film.getDescription() != null && film.getDescription().length() > 200) {
             log.error("Максимальная длина описания - 200 символов");
             throw new InappropriateInputException("Максимальная длина описания - 200 символов");
         }
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            log.error("Дата релиза должна быть не раньше 28 декабря 1985 года");
-            throw new InappropriateInputException("Дата релиза должна быть не раньше 28 декабря 1985 года");
+        if (film.getReleaseDate() == null){
+            log.error("Дата выхода должна быть известна");
+            throw new InappropriateInputException("Дата выхода должна быть известна");
         }
-//        if (!film.getDuration().isPositive()) {
+        if (film.getReleaseDate().isBefore(CINEMA_BIRTH)){
+            log.error("Дата выхода должна быть не раньше 28 декабря 1985 года");
+            throw new InappropriateInputException("Дата выхода должна быть не раньше 28 декабря 1985 года");
+        }
         if (film.getDuration() <= 0) {
             log.error("Длительность фильма должна быть положительной");
             throw new InappropriateInputException("Длительность фильма должна быть положительной");
         }
+    }
+
+    @PostMapping
+    public Film create(@RequestBody Film film) {
+        log.trace("Добавление фильма");
+        validateFilm(film);
 
         film.setId(getNextFreeId());
         films.put(film.getId(), film);
@@ -48,33 +52,19 @@ public class FilmController {
     }
 
     private int getNextFreeId() {
-        return films.keySet().stream().max(Integer::compare).orElse(0) + 1;
+        return films.keySet()
+                .stream()
+                .max(Integer::compare)
+                .orElse(0) + 1;
     }
 
     @PutMapping
     public Film update(@RequestBody Film film) {
         log.trace("Обновление фильма ");
-        if (!films.containsKey(film.getId())) {
-            log.error("Такого фильма нет в библиотеке");
-            throw new InappropriateInputException("Такого фильма нет в библиотеке");
-        }
-        //В ТЗ нет пункта о совпадающих названиях фильмов
-        if (film.getName() == null || film.getName().isBlank()) {
-            log.error("Название фильма не может быть пустым");
-            throw new InappropriateInputException("Название фильма не может быть пустым");
-        }
-        if (film.getDescription().length() > 200) {
-            log.error("Максимальная длина описания - 200 символов");
-            throw new InappropriateInputException("Максимальная длина описания - 200 символов");
-        }
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            log.error("Дата релиза должна быть не раньше 28 декабря 1985 года");
-            throw new InappropriateInputException("Дата релиза должна быть не раньше 28 декабря 1985 года");
-        }
-//        if (!film.getDuration().isPositive()) {
-        if (film.getDuration() <= 0) {
-            log.error("Длительность фильма должна быть положительной");
-            throw new InappropriateInputException("Длительность фильма должна быть положительной");
+        validateFilm(film);
+        if(!films.containsKey(film.getId())){
+            log.error("Такого фильма нет");
+            throw new InappropriateInputException("Такого фильма нет");
         }
 
         //Так было в котграмме. Видимо обновление текущего элемента дешевле вставки нового на это место
