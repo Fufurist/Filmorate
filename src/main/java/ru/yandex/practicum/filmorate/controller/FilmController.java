@@ -17,7 +17,7 @@ public class FilmController {
     private final Map<Integer, Film> films = new HashMap<>();
     private static final LocalDate CINEMA_BIRTH = LocalDate.of(1895, 12, 28);
 
-    private void validateFilm(Film film){
+    private void validateFilm(Film film) {
         if (film.getName() == null || film.getName().isBlank()) {
             log.error("Название фильма не может быть пустым");
             throw new InappropriateInputException("Название фильма не может быть пустым");
@@ -26,11 +26,11 @@ public class FilmController {
             log.error("Максимальная длина описания - 200 символов");
             throw new InappropriateInputException("Максимальная длина описания - 200 символов");
         }
-        if (film.getReleaseDate() == null){
+        if (film.getReleaseDate() == null) {
             log.error("Дата выхода должна быть известна");
             throw new InappropriateInputException("Дата выхода должна быть известна");
         }
-        if (film.getReleaseDate().isBefore(CINEMA_BIRTH)){
+        if (film.getReleaseDate().isBefore(CINEMA_BIRTH)) {
             log.error("Дата выхода должна быть не раньше 28 декабря 1985 года");
             throw new InappropriateInputException("Дата выхода должна быть не раньше 28 декабря 1985 года");
         }
@@ -62,7 +62,7 @@ public class FilmController {
     public Film update(@RequestBody Film film) {
         log.trace("Обновление фильма ");
         validateFilm(film);
-        if(!films.containsKey(film.getId())){
+        if (!films.containsKey(film.getId())) {
             log.error("Такого фильма нет");
             throw new InappropriateInputException("Такого фильма нет");
         }
