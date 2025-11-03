@@ -1,24 +1,21 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.InappropriateInputException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
-    private final Map<Integer, User> users;
-
-    public UserController() {
-        users = new HashMap<>();
-    }
+    private final UserStorage users;
 
     private void validateUser(User user) {
         if (user.getEmail() == null || user.getEmail().isBlank()) {
@@ -56,29 +53,24 @@ public class UserController {
         log.trace("Создать нового пользователя");
         validateUser(user);
 
-        user.setId(getNextFreeId());
-        users.put(user.getId(), user);
+        user = users.add(user);
         log.info("Создан новый пользователь");
         return user;
-    }
-
-    private int getNextFreeId() {
-        return users.keySet()
-                .stream()
-                .max(Integer::compare)
-                .orElse(0) + 1;
     }
 
     @PutMapping
     public User update(@RequestBody User user) {
         log.trace("Обновление пользователя");
-        validateUser(user);
+        // На мой взгляд вся валидация должна проходить в контроллерах, поскольку сырые данные мы получаем именно здесь.
+        // Потому, проверив данные сразу мы гарантируем, что дальнейшая логика программы не будет нуждаться в повторных
+        // проверках, к тому же таким образом мы держим проверки в одном месте.
         if (!users.containsKey(user.getId())) {
             log.error("Такого пользователя нет");
             throw new InappropriateInputException("Такого пользователя нет");
         }
+        validateUser(user);
 
-        users.put(user.getId(), user);
+        user = users.update(user);
         log.info("Пользователь обновлен");
         return user;
     }

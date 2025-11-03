@@ -1,20 +1,21 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.InappropriateInputException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @RestController
 @RequestMapping("/films")
+@RequiredArgsConstructor
 public class FilmController {
-    private final Map<Integer, Film> films = new HashMap<>();
+    private final FilmStorage films;
     private static final LocalDate CINEMA_BIRTH = LocalDate.of(1895, 12, 28);
 
     private void validateFilm(Film film) {
@@ -45,17 +46,9 @@ public class FilmController {
         log.trace("Добавление фильма");
         validateFilm(film);
 
-        film.setId(getNextFreeId());
-        films.put(film.getId(), film);
+        films.add(film);
         log.info("Добавлен новый фильм");
         return film;
-    }
-
-    private int getNextFreeId() {
-        return films.keySet()
-                .stream()
-                .max(Integer::compare)
-                .orElse(0) + 1;
     }
 
     @PutMapping
@@ -67,14 +60,9 @@ public class FilmController {
             throw new InappropriateInputException("Такого фильма нет");
         }
 
-        //Так было в котграмме. Видимо обновление текущего элемента дешевле вставки нового на это место
-        Film oldFilm = films.get(film.getId());
-        oldFilm.setName(film.getName());
-        oldFilm.setDescription(film.getDescription());
-        oldFilm.setReleaseDate(film.getReleaseDate());
-        oldFilm.setDuration(film.getDuration());
+        film = films.update(film);
         log.info("Фильм успешно изменён");
-        return oldFilm;
+        return film;
     }
 
     @GetMapping
