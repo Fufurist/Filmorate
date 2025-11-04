@@ -109,12 +109,15 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends")
-    public Collection<Integer> deleteFriend(@PathVariable int id) {
+    public Collection<User> deleteFriend(@PathVariable int id) {
         if (!users.containsKey(id)) {
             throw new ElementNotFoundException("Такого пользователя не существует");
         }
 
-        return users.getUser(id).getFriendIds();
+        return users.getUser(id).getFriendIds()
+                .stream()
+                .map(users::getUser)
+                .toList();
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")

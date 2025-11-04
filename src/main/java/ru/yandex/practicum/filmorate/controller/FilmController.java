@@ -62,7 +62,7 @@ public class FilmController {
         validateFilm(film);
         if (!films.containsKey(film.getId())) {
             log.error("Такого фильма нет");
-            throw new InappropriateInputException("Такого фильма нет");
+            throw new ElementNotFoundException("Такого фильма нет");
         }
 
         film = films.update(film);
@@ -76,7 +76,7 @@ public class FilmController {
         return films.values();
     }
 
-    @PutMapping("/films/{id}/like/{userId}")
+    @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable int id, @PathVariable int userId) {
         if (!films.containsKey(id)) {
             throw new ElementNotFoundException("Такого фильма не существует");
@@ -88,7 +88,7 @@ public class FilmController {
         filmService.addLike(id, userId);
     }
 
-    @DeleteMapping("/films/{id}/like/{userId}")
+    @DeleteMapping("/{id}/like/{userId}")
     public void deleteLike(@PathVariable int id, @PathVariable int userId) {
         if (!films.containsKey(id)) {
             throw new ElementNotFoundException("Такого фильма не существует");
@@ -100,7 +100,7 @@ public class FilmController {
         filmService.removeLike(id, userId);
     }
 
-    @GetMapping("/films/popular")
+    @GetMapping("/popular")
     public Collection<Film> addLike(@RequestParam(required = false) Integer count) {
 
         return films.getNBest((count == null) ? 10 : count);
