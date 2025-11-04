@@ -52,14 +52,13 @@ public class UserController {
     }
 
     @PostMapping
-    @ResponseBody
     public User create(@RequestBody User user) {
         log.trace("Создать нового пользователя");
         validateUser(user);
 
-        User newUser = users.add(user);
+        user = users.add(user);
         log.info("Создан новый пользователь");
-        return newUser;
+        return user;
     }
 
     @PutMapping
@@ -74,9 +73,9 @@ public class UserController {
         }
         validateUser(user);
 
-        User newUser = users.update(user);
+        user = users.update(user);
         log.info("Пользователь обновлен");
-        return newUser;
+        return user;
     }
 
     @GetMapping

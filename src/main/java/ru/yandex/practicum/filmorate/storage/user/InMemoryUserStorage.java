@@ -17,12 +17,14 @@ public class InMemoryUserStorage implements UserStorage {
     public User add(User user) {
         lastId += 1;
         user.setId(lastId);
-        return users.put(lastId, user);
+        users.put(lastId, user);
+        return user;
     }
 
     @Override
     public User update(User user) {
-        return users.put(user.getId(), user);
+        users.put(user.getId(), user);
+        return user;
     }
 
     @Override
