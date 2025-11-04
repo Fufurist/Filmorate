@@ -20,7 +20,7 @@ public class UserControllerTest {
 
     @Test
     public void voidLogin() {
-        User user = new User(new HashSet<>());
+        User user = new User();
         user.setEmail("aaa@");//"golder.ok@mail.com");
         user.setName("");
         user.setLogin(null);
@@ -37,7 +37,7 @@ public class UserControllerTest {
 
     @Test
     public void emailValidation() {
-        User user = new User(new HashSet<>());
+        User user = new User();
         user.setEmail("aaa@");//"golder.ok@mail.com");
         user.setName("");
         user.setLogin("coller");
@@ -68,7 +68,7 @@ public class UserControllerTest {
 
     @Test
     public void birthDayTooLate() {
-        User user = new User(new HashSet<>());
+        User user = new User();
         user.setEmail("aaa@");//"golder.ok@mail.com");
         user.setName("");
         user.setLogin("coller");
