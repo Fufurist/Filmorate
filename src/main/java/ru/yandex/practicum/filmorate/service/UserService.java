@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -39,14 +38,7 @@ public class UserService {
         users.update(friend);
     }
 
-    public Collection<User> getFriendslist(int userId) {
-        return users.getUser(userId).getFriendIds()
-                .stream()
-                .map(users::getUser)
-                .collect(Collectors.toList());
-    }
-
-    public Collection<User> getCommonFriends(int user1, int user2) {
+    public Collection<User> findCommonFriends(int user1, int user2) {
         Set<Integer> user1Friends = users.getUser(user1).getFriendIds();
         Collection<User> returnCollection = new ArrayList<>();
         for (Integer i : users.getUser(user2).getFriendIds()) {
