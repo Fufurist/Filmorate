@@ -57,9 +57,9 @@ public class UserController {
         log.trace("Создать нового пользователя");
         validateUser(user);
 
-        user = users.add(user);
+        User newUser = users.add(user);
         log.info("Создан новый пользователь");
-        return user;
+        return newUser;
     }
 
     @PutMapping
@@ -74,9 +74,9 @@ public class UserController {
         }
         validateUser(user);
 
-        user = users.update(user);
+        User newUser = users.update(user);
         log.info("Пользователь обновлен");
-        return user;
+        return newUser;
     }
 
     @GetMapping
