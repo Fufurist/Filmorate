@@ -52,6 +52,7 @@ public class UserController {
     }
 
     @PostMapping
+    @ResponseBody
     public User create(@RequestBody User user) {
         log.trace("Создать нового пользователя");
         validateUser(user);
