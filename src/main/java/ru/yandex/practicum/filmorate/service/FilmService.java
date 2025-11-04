@@ -7,7 +7,7 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 @Service
 @RequiredArgsConstructor
-public class FilmsService {
+public class FilmService {
     private final FilmStorage films;
 
     public void addLike(int filmId, int userId) {

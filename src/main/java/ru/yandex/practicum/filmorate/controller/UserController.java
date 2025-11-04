@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Set;
 
 @Slf4j
 @RestController
@@ -86,7 +85,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public Set<Integer> addFriend(@PathVariable int id, @PathVariable int friendId) {
+    public void addFriend(@PathVariable int id, @PathVariable int friendId) {
         if (!users.containsKey(id)) {
             throw new ElementNotFoundException("Такого пользователя не существует");
         }
@@ -95,12 +94,10 @@ public class UserController {
         }
 
         userService.addFriend(id, friendId);
-
-        return users.getUser(id).getFriendIds();
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public Set<Integer> deleteFriend(@PathVariable int id, @PathVariable int friendId) {
+    public void deleteFriend(@PathVariable int id, @PathVariable int friendId) {
         if (!users.containsKey(id)) {
             throw new ElementNotFoundException("Такого пользователя не существует");
         }
@@ -109,12 +106,10 @@ public class UserController {
         }
 
         userService.removeFriend(id, friendId);
-
-        return users.getUser(id).getFriendIds();
     }
 
     @GetMapping("/{id}/friends")
-    public Set<Integer> deleteFriend(@PathVariable int id) {
+    public Collection<Integer> deleteFriend(@PathVariable int id) {
         if (!users.containsKey(id)) {
             throw new ElementNotFoundException("Такого пользователя не существует");
         }

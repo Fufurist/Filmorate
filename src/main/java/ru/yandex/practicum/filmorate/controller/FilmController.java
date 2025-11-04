@@ -3,9 +3,12 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exceptions.ElementNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.InappropriateInputException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -16,6 +19,8 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class FilmController {
     private final FilmStorage films;
+    private final FilmService filmService;
+    private final UserStorage users;
     private static final LocalDate CINEMA_BIRTH = LocalDate.of(1895, 12, 28);
 
     private void validateFilm(Film film) {
@@ -69,5 +74,35 @@ public class FilmController {
     public Collection<Film> finAll() {
         log.info("Запрос всех фильмов");
         return films.values();
+    }
+
+    @PutMapping("/films/{id}/like/{userId}")
+    public void addLike(@PathVariable int id, @PathVariable int userId) {
+        if (!films.containsKey(id)) {
+            throw new ElementNotFoundException("Такого фильма не существует");
+        }
+        if (!users.containsKey(userId)) {
+            throw new ElementNotFoundException("Такого пользователя не существует");
+        }
+
+        filmService.addLike(id, userId);
+    }
+
+    @DeleteMapping("/films/{id}/like/{userId}")
+    public void deleteLike(@PathVariable int id, @PathVariable int userId) {
+        if (!films.containsKey(id)) {
+            throw new ElementNotFoundException("Такого фильма не существует");
+        }
+        if (!users.containsKey(userId)) {
+            throw new ElementNotFoundException("Такого пользователя не существует");
+        }
+
+        filmService.removeLike(id, userId);
+    }
+
+    @GetMapping("/films/popular")
+    public Collection<Film> addLike(@RequestParam(required = false) Integer count) {
+
+        return films.getNBest((count == null) ? 10 : count);
     }
 }
