@@ -21,10 +21,4 @@ public class ExceptionController {
     public ErrorResponse handleElementNotFound(ElementNotFoundException e) {
         return new ErrorResponse("ElementNotFoundException", e.getMessage());
     }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleElementNotFound(RuntimeException e) {
-        return new ErrorResponse(e.getClass().toString(), e.getMessage());
-    }
 }
