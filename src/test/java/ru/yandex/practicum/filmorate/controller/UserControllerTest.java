@@ -1,18 +1,22 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestComponent;
 import ru.yandex.practicum.filmorate.exceptions.InappropriateInputException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 
 @TestComponent
 public class UserControllerTest {
-    @Autowired
-    private UserController controller;
+    private final UserController controller = new UserController(new InMemoryUserStorage(new HashMap<>()),
+            new UserService(new InMemoryUserStorage(new HashMap<>())));
 
     @Test
     public void voidLogin() {
