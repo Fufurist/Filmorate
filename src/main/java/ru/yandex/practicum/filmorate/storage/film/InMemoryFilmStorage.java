@@ -20,12 +20,14 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Film add(Film film) {
         lastId += 1;
         film.setId(lastId);
-        return films.put(lastId, film);
+        films.put(lastId, film);
+        return film;
     }
 
     @Override
     public Film update(Film film) {
-        return films.put(film.getId(), film);
+        films.put(film.getId(), film);
+        return film;
     }
 
     @Override

@@ -12,7 +12,7 @@ public class User {
     private String login;
     private String name;
     private LocalDate birthday;
-    private Set<Integer> friendIds;
+    private final Set<Integer> friendIds;
 
     public void addFriendId(int friendId) {
         friendIds.add(friendId);

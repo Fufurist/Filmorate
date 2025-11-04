@@ -12,7 +12,7 @@ public class Film {
     private String description;
     private LocalDate releaseDate;
     private int duration;
-    private Set<Integer> likesBy;
+    private final Set<Integer> likesBy;
 
     public void addLike(int userId) {
         likesBy.add(userId);
