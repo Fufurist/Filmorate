@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.HashSet;
 
 @TestComponent
 public class UserControllerTest {
@@ -19,7 +20,7 @@ public class UserControllerTest {
 
     @Test
     public void voidLogin() {
-        User user = new User();
+        User user = new User(new HashSet<>());
         user.setEmail("aaa@");//"golder.ok@mail.com");
         user.setName("");
         user.setLogin(null);
@@ -36,7 +37,7 @@ public class UserControllerTest {
 
     @Test
     public void emailValidation() {
-        User user = new User();
+        User user = new User(new HashSet<>());
         user.setEmail("aaa@");//"golder.ok@mail.com");
         user.setName("");
         user.setLogin("coller");
@@ -67,7 +68,7 @@ public class UserControllerTest {
 
     @Test
     public void birthDayTooLate() {
-        User user = new User();
+        User user = new User(new HashSet<>());
         user.setEmail("aaa@");//"golder.ok@mail.com");
         user.setName("");
         user.setLogin("coller");
