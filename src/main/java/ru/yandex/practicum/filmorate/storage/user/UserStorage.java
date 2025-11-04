@@ -12,4 +12,6 @@ public interface UserStorage {
     public boolean containsKey(int key);
 
     public Collection<User> values();
+
+    public User getUser(int id);
 }
