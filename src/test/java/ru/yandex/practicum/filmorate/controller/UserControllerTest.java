@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
 import java.util.HashMap;
-import java.util.HashSet;
 
 @TestComponent
 public class UserControllerTest {
