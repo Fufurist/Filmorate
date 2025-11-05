@@ -1,20 +1,21 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.TestComponent;
 import ru.yandex.practicum.filmorate.exceptions.InappropriateInputException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 
+@TestComponent
 public class UserControllerTest {
-    private UserController controller;
-
-    @BeforeEach
-    public void setup() {
-        controller = new UserController();
-    }
+    // про внедрение зависимостей в тесты рассказано преступно мало, так что будет на костылях
+    private final UserController controller = new UserController(new UserService(
+            new InMemoryUserStorage(new HashMap<>())));
 
     @Test
     public void voidLogin() {
