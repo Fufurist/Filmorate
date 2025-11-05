@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -28,17 +29,14 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public boolean containsKey(int key) {
-        return users.containsKey(key);
-    }
-
-    @Override
     public Collection<User> values() {
         return users.values();
     }
 
     @Override
-    public User getUser(int id) {
-        return users.get(id);
+    public Optional<User> getUser(int id) {
+        if (users.containsKey(id)) {
+            return Optional.of(users.get(id));
+        } else return Optional.empty();
     }
 }

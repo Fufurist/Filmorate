@@ -5,10 +5,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmLikesComparator;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -31,31 +28,23 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public boolean containsKey(int key) {
-        return films.containsKey(key);
-    }
-
-    @Override
     public Collection<Film> values() {
         return films.values();
     }
 
     @Override
-    public Film getFilm(int filmId) {
-        return films.get(filmId);
+    public Optional<Film> getFilm(int filmId) {
+        if (films.containsKey(filmId)) {
+            return Optional.of(films.get(filmId));
+        } else return Optional.empty();
     }
 
     // Поместил сюда, т.к. потом черед БД будет более удобная сортировка и сборка
     public Collection<Film> getNBest(int count) {
-        List<Film> sortedFilms = films.values()
+        return films.values()
                 .stream()
                 .sorted(new FilmLikesComparator())
+                .limit(count)
                 .toList();
-        // Не нашел коллектора, который собирал бы только первые N элементов. Скорее всего просто плохо искал
-        List<Film> firstN = new ArrayList<>();
-        for (int i = 0; i < Integer.min(count, sortedFilms.size()); i++) {
-            firstN.add(sortedFilms.get(i));
-        }
-        return firstN;
     }
 }

@@ -3,11 +3,9 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.ElementNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.InappropriateInputException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -17,7 +15,6 @@ import java.util.Collection;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
-    private final UserStorage users;
     private final UserService userService;
 
     private void validateUser(User user) {
@@ -56,7 +53,7 @@ public class UserController {
         log.trace("Создать нового пользователя");
         validateUser(user);
 
-        user = users.add(user);
+        user = userService.add(user);
         log.info("Создан новый пользователь");
         return user;
     }
@@ -64,16 +61,9 @@ public class UserController {
     @PutMapping
     public User update(@RequestBody User user) {
         log.trace("Обновление пользователя");
-        // На мой взгляд вся валидация должна проходить в контроллерах, поскольку сырые данные мы получаем именно здесь.
-        // Потому, проверив данные сразу мы гарантируем, что дальнейшая логика программы не будет нуждаться в повторных
-        // проверках, к тому же таким образом мы держим проверки в одном месте.
-        if (!users.containsKey(user.getId())) {
-            log.error("Такого пользователя нет");
-            throw new ElementNotFoundException("Такого пользователя нет");
-        }
         validateUser(user);
 
-        user = users.update(user);
+        user = userService.update(user);
         log.info("Пользователь обновлен");
         return user;
     }
@@ -81,54 +71,36 @@ public class UserController {
     @GetMapping
     public Collection<User> findAll() {
         log.info("Запрос всех пользователей");
-        return users.values();
+        return userService.values();
+    }
+
+    private boolean commonFriendIdValidation(int id, int friendId) {
+        if (id == friendId) {
+            throw new InappropriateInputException("Пользователь не может быть другом себе");
+        }
+        return true;
     }
 
     @PutMapping("/{id}/friends/{friendId}")
     public void addFriend(@PathVariable int id, @PathVariable int friendId) {
-        if (!users.containsKey(id)) {
-            throw new ElementNotFoundException("Такого пользователя не существует");
-        }
-        if (!users.containsKey(friendId)) {
-            throw new ElementNotFoundException("Такого кандидата в друзья не существует");
-        }
-
+        commonFriendIdValidation(id, friendId);
         userService.addFriend(id, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
     public void deleteFriend(@PathVariable int id, @PathVariable int friendId) {
-        if (!users.containsKey(id)) {
-            throw new ElementNotFoundException("Такого пользователя не существует");
-        }
-        if (!users.containsKey(friendId)) {
-            throw new ElementNotFoundException("Такого кандидата в друзья не существует");
-        }
-
+        commonFriendIdValidation(id, friendId);
         userService.removeFriend(id, friendId);
     }
 
     @GetMapping("/{id}/friends")
-    public Collection<User> deleteFriend(@PathVariable int id) {
-        if (!users.containsKey(id)) {
-            throw new ElementNotFoundException("Такого пользователя не существует");
-        }
-
-        return users.getUser(id).getFriendIds()
-                .stream()
-                .map(users::getUser)
-                .toList();
+    public Collection<User> getFriends(@PathVariable int id) {
+        return userService.getUserFriends(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
     public Collection<User> findCommonFriends(@PathVariable int id, @PathVariable int otherId) {
-        if (!users.containsKey(id)) {
-            throw new ElementNotFoundException("Такого пользователя не существует");
-        }
-        if (!users.containsKey(otherId)) {
-            throw new ElementNotFoundException("Такого прочего пользователя не существует");
-        }
-
+        commonFriendIdValidation(id, otherId);
         return userService.findCommonFriends(id, otherId);
     }
 }

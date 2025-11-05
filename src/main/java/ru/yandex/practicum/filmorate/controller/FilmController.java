@@ -7,8 +7,6 @@ import ru.yandex.practicum.filmorate.exceptions.ElementNotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.InappropriateInputException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -18,9 +16,7 @@ import java.util.Collection;
 @RequestMapping("/films")
 @RequiredArgsConstructor
 public class FilmController {
-    private final FilmStorage films;
     private final FilmService filmService;
-    private final UserStorage users;
     private static final LocalDate CINEMA_BIRTH = LocalDate.of(1895, 12, 28);
 
     private void validateFilm(Film film) {
@@ -51,7 +47,7 @@ public class FilmController {
         log.trace("Добавление фильма");
         validateFilm(film);
 
-        films.add(film);
+        film = filmService.add(film);
         log.info("Добавлен новый фильм");
         return film;
     }
@@ -60,12 +56,8 @@ public class FilmController {
     public Film update(@RequestBody Film film) {
         log.trace("Обновление фильма ");
         validateFilm(film);
-        if (!films.containsKey(film.getId())) {
-            log.error("Такого фильма нет");
-            throw new ElementNotFoundException("Такого фильма нет");
-        }
 
-        film = films.update(film);
+        film = filmService.update(film);
         log.info("Фильм успешно изменён");
         return film;
     }
@@ -73,36 +65,27 @@ public class FilmController {
     @GetMapping
     public Collection<Film> finAll() {
         log.info("Запрос всех фильмов");
-        return films.values();
+        return filmService.values();
     }
 
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable int id, @PathVariable int userId) {
-        if (!films.containsKey(id)) {
-            throw new ElementNotFoundException("Такого фильма не существует");
-        }
-        if (!users.containsKey(userId)) {
-            throw new ElementNotFoundException("Такого пользователя не существует");
-        }
-
         filmService.addLike(id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
     public void deleteLike(@PathVariable int id, @PathVariable int userId) {
-        if (!films.containsKey(id)) {
-            throw new ElementNotFoundException("Такого фильма не существует");
-        }
-        if (!users.containsKey(userId)) {
-            throw new ElementNotFoundException("Такого пользователя не существует");
-        }
-
         filmService.removeLike(id, userId);
     }
 
     @GetMapping("/popular")
     public Collection<Film> addLike(@RequestParam(required = false) Integer count) {
+        if (count == null) {
+            count = 10;
+        } else if (count < 0) {
+            throw new InappropriateInputException("Количество фильмов в топе не может быть отрицательным");
+        }
 
-        return films.getNBest((count == null) ? 10 : count);
+        return filmService.getNBest(count);
     }
 }

@@ -14,8 +14,8 @@ import java.util.HashMap;
 @TestComponent
 public class UserControllerTest {
     // про внедрение зависимостей в тесты рассказано преступно мало, так что будет на костылях
-    private final UserController controller = new UserController(new InMemoryUserStorage(new HashMap<>()),
-            new UserService(new InMemoryUserStorage(new HashMap<>())));
+    private final UserController controller = new UserController(new UserService(
+            new InMemoryUserStorage(new HashMap<>())));
 
     @Test
     public void voidLogin() {
