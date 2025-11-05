@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.Set;
 
 @Component
@@ -62,11 +61,8 @@ public class UserService {
     }
 
     public User getUserOrThrow(int userId) {
-        Optional<User> user = users.getUser(userId);
-        if (user.isEmpty()) {
-            throw new ElementNotFoundException("Пользователя с ID " + userId + "Не существует");
-        }
-        return user.get();
+        return users.getUser(userId).orElseThrow(() ->
+                new ElementNotFoundException("Пользователя с ID " + userId + "Не существует"));
     }
 
     public Collection<User> getUserFriends(int id) {

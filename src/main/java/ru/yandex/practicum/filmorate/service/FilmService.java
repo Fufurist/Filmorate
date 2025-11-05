@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.Collection;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,14 +28,8 @@ public class FilmService {
     }
 
     public Film getFilmOrThrow(int filmId) throws ElementNotFoundException {
-        // Долго пытался придумать, почему делать такой метод не стоит, но в итоге согласился, что такой способ хорош
-        // для кастомных исключений. А использование Optional позволяет сделать проверку и получение данных за один
-        // запрос в хранилище, а не за два.
-        Optional<Film> film = films.getFilm(filmId);
-        if (film.isEmpty()) {
-            throw new ElementNotFoundException("Фильма с ID " + filmId + "Не существует");
-        }
-        return film.get();
+        return films.getFilm(filmId).orElseThrow(() ->
+                new ElementNotFoundException("Фильма с ID " + filmId + " Не существует"));
     }
 
     public void addLike(int filmId, int userId) {

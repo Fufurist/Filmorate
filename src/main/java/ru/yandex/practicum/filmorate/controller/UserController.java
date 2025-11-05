@@ -74,11 +74,10 @@ public class UserController {
         return userService.values();
     }
 
-    private boolean commonFriendIdValidation(int id, int friendId) {
+    private void commonFriendIdValidation(int id, int friendId) {
         if (id == friendId) {
             throw new InappropriateInputException("Пользователь не может быть другом себе");
         }
-        return true;
     }
 
     @PutMapping("/{id}/friends/{friendId}")

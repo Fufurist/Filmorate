@@ -34,9 +34,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Optional<Film> getFilm(int filmId) {
-        if (films.containsKey(filmId)) {
-            return Optional.of(films.get(filmId));
-        } else return Optional.empty();
+        return Optional.ofNullable(films.get(filmId));
     }
 
     // Поместил сюда, т.к. потом черед БД будет более удобная сортировка и сборка

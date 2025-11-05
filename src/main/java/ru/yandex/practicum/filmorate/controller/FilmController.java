@@ -81,8 +81,8 @@ public class FilmController {
     public Collection<Film> addLike(@RequestParam(required = false) Integer count) {
         if (count == null) {
             count = 10;
-        } else if (count < 0) {
-            throw new InappropriateInputException("Количество фильмов в топе не может быть отрицательным");
+        } else if (count <= 0) {
+            throw new InappropriateInputException("Количество фильмов должно быть положительным");
         }
 
         return filmService.getNBest(count);
