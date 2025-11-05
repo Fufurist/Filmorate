@@ -21,6 +21,7 @@ public class UserService {
     }
 
     public User update(User user) {
+        getUserOrThrow(user.getId());
         return users.update(user);
     }
 
