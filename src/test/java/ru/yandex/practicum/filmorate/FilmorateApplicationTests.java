@@ -13,7 +13,7 @@ import java.util.Optional;
 @JdbcTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-class FilmoRateApplicationTests {
+class FilmorateApplicationTests {
     private final UserDBStorage userStorage;
 
     @Test
