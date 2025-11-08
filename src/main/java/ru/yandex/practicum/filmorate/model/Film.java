@@ -16,8 +16,8 @@ public class Film {
     private LocalDate releaseDate;
     private int duration;
     private Set<Integer> likedBy = new HashSet<>();
-    private Collection<String> genres = new ArrayList<>();
-    private Rating rating;
+    private Collection<Integer> genres = new ArrayList<>();
+    private int rating;
 
     public void addLike(int userId) {
         likedBy.add(userId);

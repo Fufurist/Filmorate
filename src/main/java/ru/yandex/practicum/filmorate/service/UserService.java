@@ -30,13 +30,11 @@ public class UserService {
 
     public void addFriend(int userId, int friendId) {
         User user = getUserOrThrow(userId);
-        User friend = getUserOrThrow(friendId);
+        getUserOrThrow(friendId);
 
         user.addFriendId(friendId);
-        friend.addFriendId(userId);
 
         users.update(user);
-        users.update(friend);
     }
 
     public void removeFriend(int userId, int friendId) {
@@ -45,7 +43,7 @@ public class UserService {
         //Проверку на наличие в списке вынесем к остальным валидациям
 
         user.removeFriendId(friendId);
-        friend.removeFriendId(userId);
+        friend.removeFriendId(friendId);
 
         users.update(user);
         users.update(friend);
