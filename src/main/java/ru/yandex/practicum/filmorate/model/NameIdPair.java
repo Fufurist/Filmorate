@@ -1,8 +1,8 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Value;
+import lombok.Data;
 
-@Value
+@Data
 public class NameIdPair {
     int id;
     String name;

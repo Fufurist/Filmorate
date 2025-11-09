@@ -7,7 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.IdClass;
+import ru.yandex.practicum.filmorate.model.NameIdPair;
 
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -20,6 +20,22 @@ import java.util.*;
 public class FilmDBStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
 
+    private NameIdPair generateGenre(int i) {
+        NameIdPair ret = new NameIdPair();
+        ret.setId(i);
+        ret.setName(jdbcTemplate.queryForObject("SELECT name FROM genre WHERE id = ?",
+                String.class, i));
+        return ret;
+    }
+
+    private NameIdPair generateMpa(int i) {
+        NameIdPair ret = new NameIdPair();
+        ret.setId(i);
+        ret.setName(jdbcTemplate.queryForObject("SELECT name FROM rating WHERE id = ?",
+                String.class, i));
+        return ret;
+    }
+
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
         Film film = new Film();
         film.setId(resultSet.getInt("id"));
@@ -27,29 +43,29 @@ public class FilmDBStorage implements FilmStorage {
         film.setDescription(resultSet.getString("description"));
         film.setReleaseDate(resultSet.getDate("release_date").toLocalDate());
         film.setDuration(resultSet.getInt("duration"));
-        film.setMpa(new IdClass(resultSet.getInt("rating_id")));
+        film.setMpa(generateMpa(resultSet.getInt("rating_id")));
         return film;
     }
 
-    private void putFilmGenres(int filmId, Collection<IdClass> genresIds) {
+    private void putFilmGenres(int filmId, Collection<NameIdPair> genresIds) {
         jdbcTemplate.update("DELETE FROM films_genres WHERE film_id = ?", filmId);
         if (!genresIds.isEmpty()) {
             StringBuilder insertString = new StringBuilder("INSERT INTO films_genres(film_id, genre_id) VALUES");
             boolean flag = false;
-            for (IdClass i : genresIds) {
+            for (NameIdPair i : genresIds) {
                 if (flag) insertString.append(",");
                 else flag = true;
-                insertString.append("(").append(filmId).append(", ").append(i.id()).append(")");
+                insertString.append("(").append(filmId).append(", ").append(i.getId()).append(")");
             }
             jdbcTemplate.update(insertString.toString());
         }
     }
 
-    private Collection<IdClass> getFilmGenres(int filmId) {
+    private Collection<NameIdPair> getFilmGenres(int filmId) {
         return jdbcTemplate.queryForList("SELECT genre_id FROM films_genres WHERE film_id = ?",
                         int.class, filmId)
                 .stream()
-                .map(IdClass::new)
+                .map(this::generateGenre)
                 .toList();
     }
 
@@ -83,7 +99,7 @@ public class FilmDBStorage implements FilmStorage {
         insertValue.put("description", film.getDescription());
         insertValue.put("release_date", Date.valueOf(film.getReleaseDate()));
         insertValue.put("duration", film.getDuration());
-        insertValue.put("rating_id", film.getMpa().id());
+        insertValue.put("rating_id", film.getMpa().getId());
         int filmId = simpleJdbcInsert.executeAndReturnKey(insertValue).intValue();
         putFilmGenres(filmId, film.getGenres());
         putFilmLikes(filmId, film.getLikedBy());
@@ -92,7 +108,7 @@ public class FilmDBStorage implements FilmStorage {
         Film returnFilm = jdbcTemplate.queryForObject("SELECT * FROM films WHERE id = ?",
                 this::mapRowToFilm, filmId);
         if (returnFilm != null) {
-            Collection<IdClass> genres = getFilmGenres(returnFilm.getId());
+            Collection<NameIdPair> genres = getFilmGenres(returnFilm.getId());
             if (!genres.isEmpty()) returnFilm.setGenres(new HashSet<>(genres));
             Collection<Integer> likes = getFilmLikes(returnFilm.getId());
             if (!likes.isEmpty()) returnFilm.setLikedBy(new HashSet<>(likes));
@@ -108,7 +124,7 @@ public class FilmDBStorage implements FilmStorage {
 
         // В Н2 нельзя применять ON CONFLICT из-за отличающегося синтаксиса, так что буду так обновлять
         jdbcTemplate.update(updateQuery, film.getName(), film.getDescription(), Date.valueOf(film.getReleaseDate()),
-                film.getDuration(), film.getMpa().id(), film.getId());
+                film.getDuration(), film.getMpa().getId(), film.getId());
         putFilmGenres(film.getId(), film.getGenres());
         putFilmLikes(film.getId(), film.getLikedBy());
 
@@ -116,7 +132,7 @@ public class FilmDBStorage implements FilmStorage {
                 this::mapRowToFilm, film.getId());
         // Как и тут
         if (returnFilm != null) {
-            Collection<IdClass> genres = getFilmGenres(returnFilm.getId());
+            Collection<NameIdPair> genres = getFilmGenres(returnFilm.getId());
             if (!genres.isEmpty()) returnFilm.setGenres(new HashSet<>(genres));
             Collection<Integer> likes = getFilmLikes(returnFilm.getId());
             if (!likes.isEmpty()) returnFilm.setLikedBy(new HashSet<>(likes));
@@ -140,7 +156,7 @@ public class FilmDBStorage implements FilmStorage {
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
-        Collection<IdClass> genres = getFilmGenres(filmId);
+        Collection<NameIdPair> genres = getFilmGenres(filmId);
         if (film.isPresent() && !genres.isEmpty()) film.get().setGenres(new HashSet<>(genres));
         Collection<Integer> likes = getFilmLikes(filmId);
         if (film.isPresent() && !likes.isEmpty()) film.get().setLikedBy(new HashSet<>(likes));

@@ -89,7 +89,7 @@ public class FilmController {
     }
 
     @GetMapping("/{filmId}")
-    public Film getFilm(@PathVariable int filmId){
+    public Film getFilm(@PathVariable int filmId) {
         return filmService.getFilmOrThrow(filmId);
     }
 }

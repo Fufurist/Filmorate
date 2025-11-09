@@ -13,8 +13,8 @@ public class Film {
     private String description;
     private LocalDate releaseDate;
     private int duration;
-    private Set<IdClass> genres = new HashSet<>();
-    private IdClass mpa;
+    private Set<NameIdPair> genres = new HashSet<>();
+    private NameIdPair mpa;
     private Set<Integer> likedBy = new HashSet<>();
 
     public void addLike(int userId) {

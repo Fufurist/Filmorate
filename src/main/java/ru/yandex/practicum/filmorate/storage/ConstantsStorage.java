@@ -17,8 +17,11 @@ public class ConstantsStorage {
 
     public NameIdPair getGenre(int id) {
         try {
-            return new NameIdPair(id, jdbcTemplate.queryForObject("SELECT name FROM genre WHERE id = ?",
+            NameIdPair ret = new NameIdPair();
+            ret.setId(id);
+            ret.setName(jdbcTemplate.queryForObject("SELECT name FROM genre WHERE id = ?",
                     String.class, id));
+            return ret;
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
@@ -26,8 +29,11 @@ public class ConstantsStorage {
 
     public NameIdPair getRating(int id) {
         try {
-            return new NameIdPair(id, jdbcTemplate.queryForObject("SELECT name FROM rating WHERE id = ?",
+            NameIdPair ret = new NameIdPair();
+            ret.setId(id);
+            ret.setName(jdbcTemplate.queryForObject("SELECT name FROM rating WHERE id = ?",
                     String.class, id));
+            return ret;
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
@@ -37,7 +43,10 @@ public class ConstantsStorage {
         List<String> quer = jdbcTemplate.queryForList("SELECT name FROM genre ORDER BY id", String.class);
         Collection<NameIdPair> ret = new ArrayList<>();
         for (int i = 1; i <= quer.size(); i++) {
-            ret.add(new NameIdPair(i, quer.get(i - 1)));
+            NameIdPair genre = new NameIdPair();
+            genre.setName(quer.get(i - 1));
+            genre.setId(i);
+            ret.add(genre);
         }
         return ret;
     }
@@ -46,7 +55,10 @@ public class ConstantsStorage {
         List<String> quer = jdbcTemplate.queryForList("SELECT name FROM rating ORDER BY id", String.class);
         Collection<NameIdPair> ret = new ArrayList<>();
         for (int i = 1; i <= quer.size(); i++) {
-            ret.add(new NameIdPair(i, quer.get(i - 1)));
+            NameIdPair rating = new NameIdPair();
+            rating.setName(quer.get(i - 1));
+            rating.setId(i);
+            ret.add(rating);
         }
         return ret;
     }
