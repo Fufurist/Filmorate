@@ -61,7 +61,7 @@ public class FilmDBStorage implements FilmStorage {
         }
     }
 
-    private Collection<NameIdPair> getFilmGenres(int filmId) {
+    private List<NameIdPair> getFilmGenres(int filmId) {
         return jdbcTemplate.queryForList("SELECT genre_id FROM films_genres WHERE film_id = ? ORDER BY genre_id",
                         int.class, filmId)
                 .stream()
@@ -161,7 +161,7 @@ public class FilmDBStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> getNBest(int count) {
+    public List<Film> getNBest(int count) {
         String queryStr = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.rating_id " +
                 "FROM films f " +
                 "INNER JOIN films_likes fl ON f.id = fl.film_id " +

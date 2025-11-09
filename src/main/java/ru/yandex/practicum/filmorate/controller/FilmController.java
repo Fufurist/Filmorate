@@ -9,7 +9,7 @@ import ru.yandex.practicum.filmorate.model.NameIdPair;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.time.LocalDate;
-import java.util.Collection;
+import java.util.*;
 
 @Slf4j
 @RestController
@@ -40,18 +40,16 @@ public class FilmController {
             log.error("Длительность фильма должна быть положительной");
             throw new InappropriateInputException("Длительность фильма должна быть положительной");
         }
-        for (NameIdPair i : film.getGenres()) {
-            boolean flag = false;
-            for (NameIdPair j : film.getGenres()) {
-                if (i == j) {
-                    if (flag) {
-                        throw new InappropriateInputException("Жанр " + i.getName() + " повторяется");
-                    } else {
-                        flag = true;
-                    }
-                }
-            }
-        }
+        //Жанров всё равно не так много
+        // И эти все костыли нужны, так как treeSet неправильно десериализуется
+        Set<NameIdPair> genresSet = new TreeSet<>(NameIdPair::compare);
+        genresSet.addAll(film.getGenres());
+        List<NameIdPair> genresList = new ArrayList<>();
+        // "AddAll can be replaced with parametrised constructor" - как выяснилось не может, т.к. если в конструктор
+        // передать сет без элементов, он выбросит исключение, а проверки на наличие хотя бы одного жанра от нас не
+        // требуется.
+        genresList.addAll(genresSet);
+        film.setGenres(genresList);
     }
 
     @PostMapping
