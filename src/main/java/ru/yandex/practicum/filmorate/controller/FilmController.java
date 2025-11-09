@@ -5,10 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.InappropriateInputException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.NameIdPair;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.time.LocalDate;
-import java.util.Collection;
+import java.util.*;
 
 @Slf4j
 @RestController
@@ -39,6 +40,16 @@ public class FilmController {
             log.error("Длительность фильма должна быть положительной");
             throw new InappropriateInputException("Длительность фильма должна быть положительной");
         }
+        //Жанров всё равно не так много
+        // И эти все костыли нужны, так как treeSet неправильно десериализуется
+        Set<NameIdPair> genresSet = new TreeSet<>(NameIdPair::compare);
+        genresSet.addAll(film.getGenres());
+        List<NameIdPair> genresList = new ArrayList<>();
+        // "AddAll can be replaced with parametrised constructor" - как выяснилось не может, т.к. если в конструктор
+        // передать сет без элементов, он выбросит исключение, а проверки на наличие хотя бы одного жанра от нас не
+        // требуется.
+        genresList.addAll(genresSet);
+        film.setGenres(genresList);
     }
 
     @PostMapping
@@ -86,5 +97,10 @@ public class FilmController {
         }
 
         return filmService.getNBest(count);
+    }
+
+    @GetMapping("/{filmId}")
+    public Film getFilm(@PathVariable int filmId) {
+        return filmService.getFilmOrThrow(filmId);
     }
 }
