@@ -87,4 +87,9 @@ public class FilmController {
 
         return filmService.getNBest(count);
     }
+
+    @GetMapping("/{filmId}")
+    public Film getFilm(@PathVariable int filmId){
+        return filmService.getFilmOrThrow(filmId);
+    }
 }

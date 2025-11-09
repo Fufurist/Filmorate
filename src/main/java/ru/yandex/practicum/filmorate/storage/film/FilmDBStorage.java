@@ -150,11 +150,11 @@ public class FilmDBStorage implements FilmStorage {
     @Override
     public Collection<Film> getNBest(int count) {
         String queryStr = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.rating_id " +
-                "FROM films AS f " +
-                "INNER JOIN films_likes AS fl ON f.id = fl.film_id " +
+                "FROM films f " +
+                "INNER JOIN films_likes fl ON f.id = fl.film_id " +
                 "GROUP BY f.id, f.name, f.description, f.release_date, f.duration, f.rating_id " +
-                "ORDER BY COUNT(fl.user_id) " +
-                "LIMIT ?) ";
+                "ORDER BY COUNT(fl.user_id) DESC " +
+                "LIMIT ? ";
         return jdbcTemplate.query(queryStr, this::mapRowToFilm, count);
     }
 }
