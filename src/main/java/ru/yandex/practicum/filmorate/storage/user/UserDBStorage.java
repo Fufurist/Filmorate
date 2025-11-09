@@ -31,14 +31,18 @@ public class UserDBStorage implements UserStorage {
 
     private void putUserFriends(int userId, Collection<Integer> friendsIds) {
         jdbcTemplate.update("DELETE FROM friend_ids WHERE user_id = ?", userId);
-        StringBuilder insertString = new StringBuilder("INSERT INTO friend_ids(user_id, friend_id) VALUES");
-        boolean flag = false;
-        for (int i : friendsIds) {
-            if (flag) insertString.append(",");
-            else flag = true;
-            insertString.append("(").append(userId).append(", ").append(i).append(")");
+        // Теперь при пустом списке друзей сначала этот список почиститься в базе, и только потом поймёт, что добавлять
+        // нечего. Да, обновлять весь список друзей в базе дороже, но зато не требует изменения сигнатуры интерфейса.
+        if (!friendsIds.isEmpty()) {
+            StringBuilder insertString = new StringBuilder("INSERT INTO friend_ids(user_id, friend_id) VALUES");
+            boolean flag = false;
+            for (int i : friendsIds) {
+                if (flag) insertString.append(",");
+                else flag = true;
+                insertString.append("(").append(userId).append(", ").append(i).append(")");
+            }
+            jdbcTemplate.update(insertString.toString());
         }
-        jdbcTemplate.update(insertString.toString());
     }
 
     private Collection<Integer> getUserFriends(int userId) {
@@ -73,7 +77,8 @@ public class UserDBStorage implements UserStorage {
 
         jdbcTemplate.update(updateQuery, user.getEmail(), user.getLogin(), user.getName(),
                 Date.valueOf(user.getBirthday()), user.getId());
-        if (!user.getFriendIds().isEmpty()) putUserFriends(user.getId(), user.getFriendIds());
+        // Нашел проблему. Друг не удалялся, потому что если список друзей был пуст, я их не обновлял в таблице.
+        putUserFriends(user.getId(), user.getFriendIds());
 
         User returnUser = jdbcTemplate.queryForObject("SELECT * FROM users WHERE id = ?",
                 this::mapRowToUser, user.getId());

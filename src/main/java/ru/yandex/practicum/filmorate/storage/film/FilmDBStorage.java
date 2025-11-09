@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.IdClass;
 
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -26,38 +27,45 @@ public class FilmDBStorage implements FilmStorage {
         film.setDescription(resultSet.getString("description"));
         film.setReleaseDate(resultSet.getDate("release_date").toLocalDate());
         film.setDuration(resultSet.getInt("duration"));
-        film.setRating(resultSet.getInt("rating_id"));
+        film.setMpa(new IdClass(resultSet.getInt("rating_id")));
         return film;
     }
 
-    private void putFilmGenres(int filmId, Collection<Integer> genresIds) {
+    private void putFilmGenres(int filmId, Collection<IdClass> genresIds) {
         jdbcTemplate.update("DELETE FROM films_genres WHERE film_id = ?", filmId);
-        StringBuilder insertString = new StringBuilder("INSERT INTO films_genres(film_id, genre_id) VALUES");
-        boolean flag = false;
-        for (int i : genresIds) {
-            if (flag) insertString.append(",");
-            else flag = true;
-            insertString.append("(").append(filmId).append(", ").append(i).append(")");
+        if (!genresIds.isEmpty()) {
+            StringBuilder insertString = new StringBuilder("INSERT INTO films_genres(film_id, genre_id) VALUES");
+            boolean flag = false;
+            for (IdClass i : genresIds) {
+                if (flag) insertString.append(",");
+                else flag = true;
+                insertString.append("(").append(filmId).append(", ").append(i.id()).append(")");
+            }
+            jdbcTemplate.update(insertString.toString());
         }
-        jdbcTemplate.update(insertString.toString());
     }
 
-    private Collection<Integer> getFilmGenres(int filmId) {
-        return Optional.of(jdbcTemplate.queryForList("SELECT genre_id FROM films_genres WHERE film_id = ?",
-                int.class, filmId)).orElse(new ArrayList<>());
+    private Collection<IdClass> getFilmGenres(int filmId) {
+        return jdbcTemplate.queryForList("SELECT genre_id FROM films_genres WHERE film_id = ?",
+                        int.class, filmId)
+                .stream()
+                .map(IdClass::new)
+                .toList();
     }
 
     private void putFilmLikes(int filmId, Collection<Integer> userIds) {
         //проверка на достоверность лайков спрятана в сервисе
         jdbcTemplate.update("DELETE FROM films_likes WHERE film_id = ?", filmId);
-        StringBuilder insertString = new StringBuilder("INSERT INTO films_likes(film_id, user_id) VALUES");
-        boolean flag = false;
-        for (int i : userIds) {
-            if (flag) insertString.append(",");
-            else flag = true;
-            insertString.append("(").append(filmId).append(", ").append(i).append(")");
+        if (!userIds.isEmpty()) {
+            StringBuilder insertString = new StringBuilder("INSERT INTO films_likes(film_id, user_id) VALUES");
+            boolean flag = false;
+            for (int i : userIds) {
+                if (flag) insertString.append(",");
+                else flag = true;
+                insertString.append("(").append(filmId).append(", ").append(i).append(")");
+            }
+            jdbcTemplate.update(insertString.toString());
         }
-        jdbcTemplate.update(insertString.toString());
     }
 
     private Collection<Integer> getFilmLikes(int filmId) {
@@ -72,19 +80,23 @@ public class FilmDBStorage implements FilmStorage {
                 .usingGeneratedKeyColumns("id");
         Map<String, Object> insertValue = new HashMap<>();
         insertValue.put("name", film.getName());
-        insertValue.put("description", film.getName());
+        insertValue.put("description", film.getDescription());
         insertValue.put("release_date", Date.valueOf(film.getReleaseDate()));
         insertValue.put("duration", film.getDuration());
-        insertValue.put("rating_id", film.getRating());
+        insertValue.put("rating_id", film.getMpa().id());
         int filmId = simpleJdbcInsert.executeAndReturnKey(insertValue).intValue();
-        if (!film.getGenres().isEmpty()) putFilmGenres(filmId, film.getGenres());
-        if (!film.getLikedBy().isEmpty()) putFilmLikes(filmId, film.getLikedBy());
+        putFilmGenres(filmId, film.getGenres());
+        putFilmLikes(filmId, film.getLikedBy());
 
         //Идея жалуется, что returnFilm Nullable, но я-то знаю, что не выбросив SQL-ошибку поле не вернётся пустым
         Film returnFilm = jdbcTemplate.queryForObject("SELECT * FROM films WHERE id = ?",
                 this::mapRowToFilm, filmId);
-        returnFilm.setGenres(getFilmGenres(filmId));
-        returnFilm.setLikedBy(new HashSet<>(getFilmLikes(filmId)));
+        if (returnFilm != null) {
+            Collection<IdClass> genres = getFilmGenres(returnFilm.getId());
+            if (!genres.isEmpty()) returnFilm.setGenres(new HashSet<>(genres));
+            Collection<Integer> likes = getFilmLikes(returnFilm.getId());
+            if (!likes.isEmpty()) returnFilm.setLikedBy(new HashSet<>(likes));
+        }
         return returnFilm;
     }
 
@@ -96,15 +108,19 @@ public class FilmDBStorage implements FilmStorage {
 
         // В Н2 нельзя применять ON CONFLICT из-за отличающегося синтаксиса, так что буду так обновлять
         jdbcTemplate.update(updateQuery, film.getName(), film.getDescription(), Date.valueOf(film.getReleaseDate()),
-                film.getDuration(), film.getRating(), film.getId());
-        if (!film.getGenres().isEmpty()) putFilmGenres(film.getId(), film.getGenres());
-        if (!film.getLikedBy().isEmpty()) putFilmLikes(film.getId(), film.getLikedBy());
+                film.getDuration(), film.getMpa().id(), film.getId());
+        putFilmGenres(film.getId(), film.getGenres());
+        putFilmLikes(film.getId(), film.getLikedBy());
 
         Film returnFilm = jdbcTemplate.queryForObject("SELECT * FROM films WHERE id = ?",
                 this::mapRowToFilm, film.getId());
         // Как и тут
-        returnFilm.setGenres(getFilmGenres(film.getId()));
-        returnFilm.setLikedBy(new HashSet<>(getFilmLikes(film.getId())));
+        if (returnFilm != null) {
+            Collection<IdClass> genres = getFilmGenres(returnFilm.getId());
+            if (!genres.isEmpty()) returnFilm.setGenres(new HashSet<>(genres));
+            Collection<Integer> likes = getFilmLikes(returnFilm.getId());
+            if (!likes.isEmpty()) returnFilm.setLikedBy(new HashSet<>(likes));
+        }
         return returnFilm;
     }
 
@@ -124,7 +140,7 @@ public class FilmDBStorage implements FilmStorage {
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
-        Collection<Integer> genres = getFilmGenres(filmId);
+        Collection<IdClass> genres = getFilmGenres(filmId);
         if (film.isPresent() && !genres.isEmpty()) film.get().setGenres(new HashSet<>(genres));
         Collection<Integer> likes = getFilmLikes(filmId);
         if (film.isPresent() && !likes.isEmpty()) film.get().setLikedBy(new HashSet<>(likes));
