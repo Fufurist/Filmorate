@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.InappropriateInputException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.NameIdPair;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.time.LocalDate;
@@ -38,6 +39,18 @@ public class FilmController {
         if (film.getDuration() <= 0) {
             log.error("Длительность фильма должна быть положительной");
             throw new InappropriateInputException("Длительность фильма должна быть положительной");
+        }
+        for (NameIdPair i : film.getGenres()) {
+            boolean flag = false;
+            for (NameIdPair j : film.getGenres()) {
+                if (i == j) {
+                    if (flag) {
+                        throw new InappropriateInputException("Жанр " + i.getName() + " повторяется");
+                    } else {
+                        flag = true;
+                    }
+                }
+            }
         }
     }
 

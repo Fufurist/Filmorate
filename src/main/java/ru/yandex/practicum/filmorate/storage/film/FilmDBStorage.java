@@ -62,7 +62,7 @@ public class FilmDBStorage implements FilmStorage {
     }
 
     private Collection<NameIdPair> getFilmGenres(int filmId) {
-        return jdbcTemplate.queryForList("SELECT genre_id FROM films_genres WHERE film_id = ?",
+        return jdbcTemplate.queryForList("SELECT genre_id FROM films_genres WHERE film_id = ? ORDER BY genre_id",
                         int.class, filmId)
                 .stream()
                 .map(this::generateGenre)
@@ -85,8 +85,18 @@ public class FilmDBStorage implements FilmStorage {
     }
 
     private Collection<Integer> getFilmLikes(int filmId) {
-        return Optional.of(jdbcTemplate.queryForList("SELECT user_id FROM films_likes WHERE film_id = ?",
+        return Optional.of(jdbcTemplate.queryForList("SELECT user_id FROM films_likes WHERE film_id = ? " +
+                        "ORDER BY user_id",
                 int.class, filmId)).orElse(new ArrayList<>());
+    }
+
+    private Film fillGenresLikes(Film film) {
+        if (film != null) {
+            film.setGenres(getFilmGenres(film.getId()));
+            Collection<Integer> likes = getFilmLikes(film.getId());
+            if (!likes.isEmpty()) film.setLikedBy(new HashSet<>(likes));
+        }
+        return film;
     }
 
     @Override
@@ -107,12 +117,7 @@ public class FilmDBStorage implements FilmStorage {
         //Идея жалуется, что returnFilm Nullable, но я-то знаю, что не выбросив SQL-ошибку поле не вернётся пустым
         Film returnFilm = jdbcTemplate.queryForObject("SELECT * FROM films WHERE id = ?",
                 this::mapRowToFilm, filmId);
-        if (returnFilm != null) {
-            Collection<NameIdPair> genres = getFilmGenres(returnFilm.getId());
-            if (!genres.isEmpty()) returnFilm.setGenres(new HashSet<>(genres));
-            Collection<Integer> likes = getFilmLikes(returnFilm.getId());
-            if (!likes.isEmpty()) returnFilm.setLikedBy(new HashSet<>(likes));
-        }
+        returnFilm = fillGenresLikes(returnFilm);
         return returnFilm;
     }
 
@@ -131,12 +136,7 @@ public class FilmDBStorage implements FilmStorage {
         Film returnFilm = jdbcTemplate.queryForObject("SELECT * FROM films WHERE id = ?",
                 this::mapRowToFilm, film.getId());
         // Как и тут
-        if (returnFilm != null) {
-            Collection<NameIdPair> genres = getFilmGenres(returnFilm.getId());
-            if (!genres.isEmpty()) returnFilm.setGenres(new HashSet<>(genres));
-            Collection<Integer> likes = getFilmLikes(returnFilm.getId());
-            if (!likes.isEmpty()) returnFilm.setLikedBy(new HashSet<>(likes));
-        }
+        returnFilm = fillGenresLikes(returnFilm);
         return returnFilm;
     }
 
@@ -156,10 +156,7 @@ public class FilmDBStorage implements FilmStorage {
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
-        Collection<NameIdPair> genres = getFilmGenres(filmId);
-        if (film.isPresent() && !genres.isEmpty()) film.get().setGenres(new HashSet<>(genres));
-        Collection<Integer> likes = getFilmLikes(filmId);
-        if (film.isPresent() && !likes.isEmpty()) film.get().setLikedBy(new HashSet<>(likes));
+        film.ifPresent(this::fillGenresLikes);
         return film;
     }
 
